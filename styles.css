@@ -12,7 +12,8 @@ body.kiosk #view-toggles,
 body.kiosk #params-toggle,
 body.kiosk #params-panel,
 body.kiosk #redesign-panel,
-body.kiosk #rp-collapse-rail { display:none !important; }
+body.kiosk #rp-collapse-rail,
+body.kiosk #err { display:none !important; }
 /* let an embedder's own background show through the transparent WebGL
    canvas (the renderer already clears to alpha 0) instead of the scene's
    background gradient, which JS sets as an inline style */

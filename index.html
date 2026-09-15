@@ -9,6 +9,19 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<script>
+// Applied synchronously, before the THREE.js script tag / any module import
+// below: if that CDN script is slow or fails (flaky network, ad-blocker, a
+// refresh racing the browser cache), the async kiosk boot further down never
+// runs, and an embed is left showing the raw authoring UI on its opaque
+// black background instead of failing gracefully transparent.
+(function(){
+  const q=new URLSearchParams(location.search);
+  const kiosk=q.get('mode')==='kiosk'||q.get('embed')==='1';
+  if(kiosk) document.body.classList.add('kiosk');
+  if(kiosk&&q.get('dots')==='0') document.body.classList.add('watch');
+})();
+</script>
 <div id="label">RED · DANGER · AGGRESSION · ALERT</div>
 <div id="dots">
   <div class="dot" style="background:#22b8e8;box-shadow:0 0 8px #5ce4ff" onclick="switchEmotion('blue')" id="d-blue"></div>
