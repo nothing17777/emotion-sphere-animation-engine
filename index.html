@@ -4106,6 +4106,14 @@ import('./sphere-core.js?v=proto3').then(({attachSphereCore})=>{
   const _q = new URLSearchParams(location.search);
   const _kiosk = _q.get('mode')==='kiosk' || _q.get('embed')==='1';
   if(_kiosk) document.body.classList.add('kiosk');
+  // layoutViewport() already ran once, synchronously, before this async boot
+  // added body.kiosk — measuring #redesign-panel at its full (visible) width
+  // and sizing the canvas around it. Re-run it now that the panel is hidden,
+  // or an embed narrower than that panel gets a near-zero-width canvas.
+  if(_kiosk && window.rpLayoutViewport) window.rpLayoutViewport();
+  // Opt-in: ?dots=0 hides the colour-dot selector too, for an embedder that
+  // brings its own emotion picker and drives playback purely via postMessage.
+  if(_kiosk && _q.get('dots')==='0') document.body.classList.add('watch');
   // The colour dots map to presets by emotion colour; in kiosk mode a click
   // plays that preset (not just recolour). d-blue=sad, d-yellow=warm,
   // d-red=anger, d-purple=calm.
