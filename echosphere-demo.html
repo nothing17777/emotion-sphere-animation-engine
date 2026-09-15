@@ -73,6 +73,34 @@ body { display: flex; align-items: center; justify-content: center; overflow: hi
 }
 #controls button:hover { background: rgba(255,255,255,0.12); }
 #controls button.active { border-color: rgba(160,202,239,0.9); color: #a0caef; }
+
+#speed {
+  position: absolute;
+  left: 50%;
+  bottom: 64px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  background: rgba(8,8,12,0.75);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
+  padding: 6px 12px;
+}
+#speed input[type="range"] {
+  width: 140px;
+  accent-color: #a0caef;
+}
+#speed em {
+  font-style: normal;
+  width: 30px;
+  text-align: right;
+  color: rgba(160,202,239,0.9);
+}
 </style>
 </head>
 <body>
@@ -87,6 +115,11 @@ body { display: flex; align-items: center; justify-content: center; overflow: hi
     <button type="button" data-emotion="warm">Warm</button>
     <button type="button" data-emotion="anger">Anger</button>
   </div>
+  <div id="speed">
+    <span>Speed</span>
+    <input type="range" id="speedRange" min="0.25" max="3" step="0.25" value="1">
+    <em id="speedValue">1x</em>
+  </div>
 </div>
 <script>
   const frame = document.getElementById('sphereFrame');
@@ -97,6 +130,14 @@ body { display: flex; align-items: center; justify-content: center; overflow: hi
       frame.contentWindow.postMessage({ type: 'emotion', value: emotion }, '*');
       buttons.forEach((b) => b.classList.toggle('active', b === btn));
     });
+  });
+
+  const speedRange = document.getElementById('speedRange');
+  const speedValue = document.getElementById('speedValue');
+  speedRange.addEventListener('input', () => {
+    const mult = Number(speedRange.value);
+    frame.contentWindow.postMessage({ type: 'speed', value: mult }, '*');
+    speedValue.textContent = mult + 'x';
   });
 </script>
 </body>

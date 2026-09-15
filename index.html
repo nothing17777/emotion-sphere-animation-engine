@@ -606,6 +606,12 @@ let spawnEnabled=true;
 let innerSpawnCursor=0;
 let innerSpawnAcc=0;
 let lastAnimT=0;
+// Global playback-speed multiplier for the emotion animation itself (not the
+// UI/camera). 1 = normal. Only scales what feeds updateInnerLayers, so the
+// auto-cycle timer, thumbnail capture, etc. (driven by the real clock
+// elsewhere) are unaffected.
+let animSpeed=1;
+let scaledElapsed=0;
 
 function swirlInward(t, phase, ox, oy, oz, len, tangAmt, inAmt){
   const inv=1/(len||1);
@@ -4099,6 +4105,11 @@ import('./sphere-core.js?v=proto3').then(({attachSphereCore})=>{
     applyPreset(text){
       applyParamsText(text); startPlayback();
     },
+    // setSpeed(mult) -> playback-rate multiplier for the animation itself
+    // (1 = normal, 2 = double speed, 0.5 = half). Clamped to a sane range.
+    setSpeed(mult){
+      animSpeed=Math.min(4,Math.max(0.1,Number(mult)||1));
+    },
   };
 
   // Kiosk boot: ?mode=kiosk (or ?embed=1) hides the UI; ?emotion=sad picks the
@@ -4157,6 +4168,7 @@ import('./sphere-core.js?v=proto3').then(({attachSphereCore})=>{
   window.addEventListener('message',(ev)=>{
     const d=ev.data;
     if(d && d.type==='emotion' && d.value) playAndMark(d.value);
+    if(d && d.type==='speed' && d.value!=null) window.emotionSphere.setSpeed(d.value);
   });
 }).catch(err=>console.error('sphere-core failed',err));
 
@@ -5545,7 +5557,9 @@ function animate(){
     });
   }
 
-  updateInnerLayers(t,dt);
+  const scaledDt=dt*animSpeed;
+  scaledElapsed+=scaledDt;
+  updateInnerLayers(scaledElapsed,scaledDt);
   renderer.render(scene,camera);
 }
 animate();
