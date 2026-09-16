@@ -20,6 +20,7 @@
   const kiosk=q.get('mode')==='kiosk'||q.get('embed')==='1';
   if(kiosk) document.body.classList.add('kiosk');
   if(kiosk&&q.get('dots')==='0') document.body.classList.add('watch');
+  if(kiosk&&q.get('solid')==='1') document.body.classList.add('solid-bg');
 })();
 </script>
 <div id="label">RED · DANGER · AGGRESSION · ALERT</div>

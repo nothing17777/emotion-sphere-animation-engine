@@ -105,7 +105,7 @@ body { display: flex; align-items: center; justify-content: center; overflow: hi
 </head>
 <body>
 <div id="stage">
-  <img src="echosphere-front.png" alt="EchoSphere robot, front view">
+  <img id="robotImg" src="echosphere-calm.png" alt="EchoSphere robot, front view">
   <div id="sphere-overlay">
     <iframe id="sphereFrame" src="index.html?mode=kiosk&dots=0&emotion=calm" allow="autoplay" title="Emotion Sphere"></iframe>
   </div>
@@ -123,11 +123,46 @@ body { display: flex; align-items: center; justify-content: center; overflow: hi
 </div>
 <script>
   const frame = document.getElementById('sphereFrame');
+  const robotImg = document.getElementById('robotImg');
   const buttons = document.querySelectorAll('#controls button');
+  // Each emotion has its own re-lit hero photo (glass sphere + rim glow
+  // recolored to match that emotion's particle animation) so the two never
+  // clash. Anger also runs on a separate, newer particle build (anger-v5.html)
+  // with its own updated look; the other three share one engine (index.html).
+  const ENGINE_SRC = 'index.html?mode=kiosk&dots=0&emotion=';
+  const ANGER_SRC = 'anger-v5.html?v=2&mode=kiosk&dots=0&emotion=anger';
+  const PHOTO_SRC = { calm: 'echosphere-calm.png', sad: 'echosphere-sad.png', warm: 'echosphere-warm.png', anger: 'echosphere-anger.png' };
+  let currentEngine = 'index';
+
   buttons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const emotion = btn.dataset.emotion;
-      frame.contentWindow.postMessage({ type: 'emotion', value: emotion }, '*');
+      robotImg.src = PHOTO_SRC[emotion];
+      if (emotion === 'anger') {
+        if (currentEngine !== 'anger') {
+          frame.src = ANGER_SRC;
+          currentEngine = 'anger';
+          // anger-v5.html sizes its WebGL canvas once, synchronously, right
+          // after load — inside this iframe that sometimes runs before the
+          // iframe's own layout has settled, reading innerWidth as 0 and
+          // leaving the canvas 1px wide (so the embers render but are
+          // invisible). Nudging it with a real resize event once loading
+          // finishes forces it to recompute against the iframe's actual,
+          // settled size.
+          frame.addEventListener('load', () => {
+            setTimeout(() => {
+              try { frame.contentWindow.dispatchEvent(new Event('resize')); } catch (e) {}
+            }, 50);
+          }, { once: true });
+        }
+      } else {
+        if (currentEngine === 'anger') {
+          frame.src = ENGINE_SRC + emotion;
+          currentEngine = 'index';
+        } else {
+          frame.contentWindow.postMessage({ type: 'emotion', value: emotion }, '*');
+        }
+      }
       buttons.forEach((b) => b.classList.toggle('active', b === btn));
     });
   });
